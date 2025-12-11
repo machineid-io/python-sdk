@@ -24,7 +24,7 @@ For now, install by cloning the repo and installing dependencies manually:
     cd python-sdk
     pip install requests
 
-(Once published to PyPI, this will switch to `pip install machineid`.)
+
 
 ---
 
