@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "machineid-io"
+version = "0.1.0"
+description = "Official Python SDK for the MachineID.io API"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+  { name = "MachineID.io" }
+]
+dependencies = [
+  "requests>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://machineid.io"
+Repository = "https://github.com/machineid-io/python-sdk"
