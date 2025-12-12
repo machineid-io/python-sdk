@@ -1,126 +1,114 @@
 # MachineID.io Python SDK
 
-Official Python client for the MachineID.io API.
+Official Python client for the **MachineID.io** API.
 
-This SDK provides a thin wrapper around the core device and usage endpoints:
-
-- POST /api/v1/devices/register  
-- GET  /api/v1/devices/validate  
-- GET  /api/v1/devices/list  
-- POST /api/v1/devices/revoke  
-- POST /api/v1/devices/unrevoke  
-- POST /api/v1/devices/remove  
-- GET  /api/v1/usage  
-
-All calls use the `x-org-key` header and return the raw JSON from the API.
+This SDK provides a thin, explicit wrapper around MachineID’s device and usage endpoints. It is designed for AI agents and distributed systems that need predictable device-level control.
 
 ---
 
 ## Installation
 
-For now, install by cloning the repo and installing dependencies manually:
+```bash
+pip install machineid-io
+```
 
-    git clone https://github.com/machineid-io/python-sdk.git
-    cd python-sdk
-    pip install requests
+---
 
+## Prerequisite
 
+Create a free org and generate an org key at:
+
+https://machineid.io
+
+Set it as an environment variable:
+
+```bash
+export MACHINEID_ORG_KEY=org_your_key_here
+```
 
 ---
 
 ## Quick Start
 
-    from machineid import MachineID
+```python
+from machineid_io import MachineID
 
-    client = MachineID("org_1234567890abcdef")
-    device_id = "agent-01"
+client = MachineID.from_env()
+device_id = "agent-01"
 
-    # Check usage / plan limits
-    usage = client.usage()
-    print("Plan:", usage["planTier"], "Limit:", usage["limit"])
+# Check usage / plan limits
+usage = client.usage()
+print("Plan:", usage["planTier"], "Limit:", usage["limit"])
 
-    # Register a device (idempotent)
-    reg = client.register(device_id)
-    print("Register status:", reg["status"])
+# Register device (idempotent)
+reg = client.register(device_id)
+print("Register status:", reg["status"])
 
-    # Validate before performing work
-    val = client.validate(device_id)
-    if val.get("allowed"):
-        print("Device allowed:", val.get("reason"))
-    else:
-        print("Device blocked:", val.get("reason"))
+# Validate before performing work
+val = client.validate(device_id)
+if not val.get("allowed"):
+    raise SystemExit("Device blocked")
 
----
-
-## API Methods
-
-All methods require an `org_key`:
-
-    from machineid import MachineID
-    client = MachineID("org_1234567890abcdef")
-
-### `usage()`
-
-    usage = client.usage()
-    print(usage)
-
-Returns plan tier, plan state, access clock, device counts, and limit status.
+print("Device allowed:", val.get("reason"))
+```
 
 ---
 
-### `register(device_id: str)`
+## Supported Operations
 
-    reg = client.register("agent-01")
-    print(reg)
+This SDK supports:
 
-Returns one of:
+- `register(device_id)`
+- `validate(device_id)`
+- `list_devices()`
+- `revoke(device_id)`
+- `unrevoke(device_id)`
+- `remove(device_id)`
+- `usage()`
 
-- `ok`  
-- `exists`  
-- `restored`  
-- `limit_reached`
-
----
-
-### `validate(device_id: str)`
-
-    val = client.validate("agent-01")
-    print(val)
-
-Use this before agents perform major tasks.
+All requests authenticate via the `x-org-key` header and return raw API JSON.
 
 ---
 
-### `list_devices()`
+## Scope
 
-    devices = client.list_devices()
-    print(devices)
+This SDK intentionally does **not**:
 
-Returns all active + revoked devices.
+- create orgs
+- manage billing or checkout
+- spawn or orchestrate agents
+- perform analytics or metering
 
----
-
-### Device management
-
-    client.revoke("agent-01")
-    client.unrevoke("agent-01")
-    client.remove("agent-01")
-
-- `revoke` → soft ban  
-- `unrevoke` → restore  
-- `remove` → hard delete  
+It is a device-level validation and control layer only.
 
 ---
 
 ## Environment-Based Setup
 
-    # export MACHINEID_ORG_KEY=org_123...
-    from machineid import MachineID
+```python
+from machineid_io import MachineID
 
-    client = MachineID.from_env()
+client = MachineID.from_env()
+```
+
+---
+
+## Version
+
+```python
+import machineid_io
+print(machineid_io.__version__)
+```
+
+---
+
+## Documentation
+
+- API reference: https://machineid.io/api
+- Docs: https://machineid.io/docs
 
 ---
 
 ## License
 
-MIT – see `LICENSE`.
+MIT
