@@ -19,3 +19,13 @@ dependencies = [
 [project.urls]
 Homepage = "https://machineid.io"
 Repository = "https://github.com/machineid-io/python-sdk"
+
+[tool.hatch.build]
+exclude = [
+  "dist",
+  "build",
+  "__pycache__",
+  "*.pyc",
+  ".git",
+  ".gitignore",
+]
