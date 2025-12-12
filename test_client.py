@@ -1,5 +1,5 @@
 import os
-from machineid import MachineID
+from machineid_io import MachineID
 
 def main() -> None:
     org_key = os.getenv("MACHINEID_ORG_KEY")
