@@ -42,7 +42,11 @@ print("Plan:", usage["planTier"], "Limit:", usage["limit"])
 
 # Register device (idempotent)
 reg = client.register(device_id)
-print("Register status:", reg["status"])
+
+if reg["status"] not in ("ok", "exists"):
+    raise RuntimeError(f"Register failed: {reg}")
+
+print("Register success:", reg["status"])
 
 # Validate before performing work
 val = client.validate(device_id)
