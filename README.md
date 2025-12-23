@@ -1,97 +1,131 @@
 # MachineID Python SDK
 
-Official Python client for the MachineID device enforcement API.
+Official Python client for the **MachineID** API.
 
-MachineID lets you control whether a process, agent, or runtime is allowed to execute — in real time — using a simple register / validate model.  
-It is commonly used to enforce AI agent limits, protect automation workloads, and centrally revoke execution authority.
+This SDK provides a thin, explicit wrapper around MachineID’s device enforcement endpoints.  
+It is designed for AI agents and distributed systems that need predictable, real-time control over whether a process is allowed to execute.
 
-## Install
+MachineID acts as an authority layer — not an orchestrator — enabling centralized revoke / allow decisions without managing processes directly.
+
+---
+
+## Installation
 
 pip install machineid-io
 
-## Getting an Org Key
+---
 
-To use the SDK, you need an organization API key.
+## Prerequisite (Free Org Key)
 
-1. Sign up at https://machineid.io
-2. Create an organization in the dashboard
+MachineID offers a free org key with no billing required.
+
+1. Visit https://machineid.io
+2. Create a free organization
 3. Copy your org API key (starts with `org_...`)
 
-You will use this key to authenticate all SDK calls.
+Set it as an environment variable:
 
-## Initialize
+export MACHINEID_ORG_KEY=org_your_key_here
 
-from machineid_io.client import MachineIDClient
+---
 
-client = MachineIDClient(
-    org_key="YOUR_ORG_KEY"
-)
+## Quick Start
 
-## Register Device (idempotent)
+from machineid_io import MachineID
 
-Registers a device or agent instance.  
-Safe to call every time your process starts.
+client = MachineID.from_env()
+device_id = "agent-01"
 
-reg = client.register("agent-01")
+# Optional: check plan usage / limits
+usage = client.usage()
+print("Plan:", usage.get("planTier"), "Limit:", usage.get("limit"))
+
+# Register device (idempotent)
+reg = client.register(device_id)
 
 if reg.get("status") not in ("ok", "exists"):
     raise RuntimeError(f"Register failed: {reg}")
 
 print("Register success:", reg.get("status"))
 
-## Validate (Runtime Gate)
+# Validate before performing work (HARD GATE)
+val = client.validate(device_id)
 
-This is the enforcement checkpoint.
+if not val.get("allowed"):
+    print("Device blocked:", val.get("code"), val.get("request_id"))
+    raise SystemExit("Execution denied")
 
-Your process must stop immediately when `allowed` is False.
+print("Device allowed")
 
-res = client.validate("agent-01")
+---
 
-if not res.allowed:
-    print("Denied:", res.code, res.request_id)
-    raise SystemExit(1)
+## Validate Semantics (Important)
 
-### Validate Result Fields
+The validate call is the enforcement checkpoint.
 
-- allowed — True or False
-- code — Stable decision code (ALLOW, DEVICE_REVOKED, PLAN_FROZEN, etc.)
-- request_id — Correlation ID for logs and support
-- status, reason — Legacy fields (still included)
-- raw — Full raw API response
+- You **must stop execution immediately** when `allowed` is False
+- A revoked or blocked device will continue running only if you ignore validate
 
-## Revoke Device
+Validate returns structured decision metadata, including:
 
-Revokes execution authority.  
-The device will be blocked on its next validate call.
+- allowed — boolean
+- code — stable decision code (ALLOW, DEVICE_REVOKED, PLAN_FROZEN, etc.)
+- request_id — correlation ID for logs and support
+- status / reason — legacy fields (still included)
 
-client.revoke("agent-01")
+---
 
-## Unrevoke Device
+## Supported Operations
 
-Explicitly restores execution authority.
+This SDK supports:
 
-client.unrevoke("agent-01")
+- register(device_id)
+- validate(device_id)          (POST, canonical)
+- list_devices()
+- revoke(device_id)
+- unrevoke(device_id)
+- remove(device_id)
+- usage()
 
-## List Devices
+All requests authenticate via the `x-org-key` header and return raw API JSON.
 
-devices = client.list_devices()
-print(devices)
+---
 
-## Enforcement Model
+## Scope
 
-MachineID is an authority layer, not a process manager.
+This SDK intentionally does **not**:
 
-- Revoke = execution must stop
-- Unrevoke does not auto-restart processes
-- Validate is the single source of truth
+- create organizations
+- manage billing or checkout
+- spawn or orchestrate agents
+- perform analytics or metering
 
-Always gate execution on `validate()`.
+It is a device-level enforcement and validation layer only.
 
-## Links
+---
 
-- Dashboard: https://machineid.io/dashboard
-- Documentation: https://machineid.io/docs
-- Pricing: https://machineid.io/pricing
+## Environment-Based Setup
+
+from machineid_io import MachineID
+
+client = MachineID.from_env()
+
+---
+
+## Version
+
+import machineid_io
+print(machineid_io.__version__)
+
+---
+
+## Documentation
+
+Docs: https://machineid.io/docs  
+Dashboard: https://machineid.io/dashboard  
+Pricing: https://machineid.io/pricing
+
+---
 
 ## License
 
