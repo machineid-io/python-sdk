@@ -29,3 +29,6 @@ exclude = [
   ".git",
   ".gitignore",
 ]
+[tool.hatch.build.targets.wheel]
+packages = ["machineid"]
+
