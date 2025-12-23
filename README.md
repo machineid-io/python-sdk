@@ -14,11 +14,16 @@ client = MachineIDClient(
     org_key="YOUR_ORG_KEY"
 )
 
-## Register Device
+## Register Device (idempotent)
 
-Idempotent. Safe to call every time your agent starts.
+Safe to call every time your agent starts.
 
-client.register("agent-01")
+reg = client.register("agent-01")
+
+if reg.get("status") not in ("ok", "exists"):
+    raise RuntimeError(f"Register failed: {reg}")
+
+print("Register success:", reg.get("status"))
 
 ## Validate (Runtime Gate)
 
@@ -33,21 +38,11 @@ if not res.allowed:
 
 ### Validate Result Fields
 
-<<<<<<< HEAD
-# Register device (idempotent)
-reg = client.register(device_id)
-
-if reg["status"] not in ("ok", "exists"):
-    raise RuntimeError(f"Register failed: {reg}")
-
-print("Register success:", reg["status"])
-=======
-- allowed — True or False  
-- code — Stable decision code (ALLOW, DEVICE_REVOKED, PLAN_FROZEN, etc.)  
-- request_id — Correlation ID for logs and support  
-- status, reason — Legacy fields (still included)  
-- raw — Full raw API response  
->>>>>>> 78df738 (Python SDK: POST validate + decision codes + request_id)
+- allowed — True or False
+- code — Stable decision code (ALLOW, DEVICE_REVOKED, PLAN_FROZEN, etc.)
+- request_id — Correlation ID for logs and support
+- status, reason — Legacy fields (still included)
+- raw — Full raw API response
 
 ## Revoke Device
 
@@ -70,9 +65,9 @@ print(devices)
 
 MachineID is an authority layer, not a process manager.
 
-- Revoke = execution must stop  
-- Unrevoke does not auto-restart  
-- Validate is the single source of truth  
+- Revoke = execution must stop
+- Unrevoke does not auto-restart
+- Validate is the single source of truth
 
 Always gate execution on validate().
 
