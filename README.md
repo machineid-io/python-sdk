@@ -12,7 +12,7 @@ that need centralized execution control without managing infrastructure.
 
 ## Installation
 
-pip install machineid-io
+    pip install machineid-io
 
 ---
 
@@ -26,28 +26,28 @@ MachineID provides a free organization key with no billing required.
 
 Set it as an environment variable:
 
-export MACHINEID_ORG_KEY=org_your_key_here
+    export MACHINEID_ORG_KEY=org_your_key_here
 
 ---
 
 ## Quick Start (Hard Enforcement)
 
-from machineid import MachineID
+    from machineid import MachineID
 
-m = MachineID.from_env()
-device_id = "agent-01"
+    m = MachineID.from_env()
+    device_id = "agent-01"
 
-# Register device (idempotent)
-m.register(device_id)
+    # Register device (idempotent)
+    m.register(device_id)
 
-# HARD GATE — MUST stop execution if denied
-decision = m.validate(device_id)
+    # HARD GATE — MUST stop execution if denied
+    decision = m.validate(device_id)
 
-if not decision["allowed"]:
-    print("Execution denied:", decision["code"], decision["request_id"])
-    raise SystemExit(1)
+    if not decision["allowed"]:
+        print("Execution denied:", decision["code"], decision["request_id"])
+        raise SystemExit(1)
 
-print("Execution allowed")
+    print("Execution allowed")
 
 ---
 
@@ -57,7 +57,7 @@ validate() is the enforcement checkpoint.
 
 You must stop execution immediately when:
 
-decision["allowed"] is False
+    decision["allowed"] is False
 
 Validate returns authoritative decision metadata:
 
@@ -67,11 +67,11 @@ Validate returns authoritative decision metadata:
 
 Example response:
 
-{
-  "allowed": false,
-  "code": "DEVICE_REVOKED",
-  "request_id": "fbf77ff5-06ed-42eb-8e07-024c32ef1e68"
-}
+    {
+      "allowed": false,
+      "code": "DEVICE_REVOKED",
+      "request_id": "fbf77ff5-06ed-42eb-8e07-024c32ef1e68"
+    }
 
 ---
 
@@ -80,7 +80,7 @@ Example response:
 This SDK supports:
 
 - register(device_id)
-- validate(device_id)  (POST, canonical)
+- validate(device_id) (POST, canonical)
 - list_devices()
 - revoke(device_id)
 - unrevoke(device_id)
@@ -116,16 +116,16 @@ It is a pure enforcement client.
 
 ## Environment-Based Setup
 
-from machineid import MachineID
+    from machineid import MachineID
 
-m = MachineID.from_env()
+    m = MachineID.from_env()
 
 ---
 
 ## Version
 
-import machineid
-print(machineid.__version__)
+    import machineid
+    print(machineid.__version__)
 
 ---
 
@@ -134,7 +134,6 @@ print(machineid.__version__)
 - Docs: https://machineid.io/docs
 - Dashboard: https://machineid.io/dashboard
 - Pricing: https://machineid.io/pricing
-
 
 ---
 
