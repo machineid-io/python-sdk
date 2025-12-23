@@ -131,9 +131,10 @@ print(machineid.__version__)
 
 ## Documentation
 
-Docs: https://machineid.io/docs
-Dashboard: https://machineid.io/dashboard
-Pricing: https://machineid.io/pricing
+- Docs: https://machineid.io/docs
+- Dashboard: https://machineid.io/dashboard
+- Pricing: https://machineid.io/pricing
+
 
 ---
 
