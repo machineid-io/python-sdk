@@ -2,9 +2,22 @@
 
 Official Python client for the MachineID device enforcement API.
 
+MachineID lets you control whether a process, agent, or runtime is allowed to execute — in real time — using a simple register / validate model.  
+It is commonly used to enforce AI agent limits, protect automation workloads, and centrally revoke execution authority.
+
 ## Install
 
 pip install machineid-io
+
+## Getting an Org Key
+
+To use the SDK, you need an organization API key.
+
+1. Sign up at https://machineid.io
+2. Create an organization in the dashboard
+3. Copy your org API key (starts with `org_...`)
+
+You will use this key to authenticate all SDK calls.
 
 ## Initialize
 
@@ -16,7 +29,8 @@ client = MachineIDClient(
 
 ## Register Device (idempotent)
 
-Safe to call every time your agent starts.
+Registers a device or agent instance.  
+Safe to call every time your process starts.
 
 reg = client.register("agent-01")
 
@@ -27,8 +41,9 @@ print("Register success:", reg.get("status"))
 
 ## Validate (Runtime Gate)
 
-This is the enforcement checkpoint.  
-Your process must stop immediately when allowed is False.
+This is the enforcement checkpoint.
+
+Your process must stop immediately when `allowed` is False.
 
 res = client.validate("agent-01")
 
@@ -46,13 +61,14 @@ if not res.allowed:
 
 ## Revoke Device
 
-Stops the device on its next validate call.
+Revokes execution authority.  
+The device will be blocked on its next validate call.
 
 client.revoke("agent-01")
 
 ## Unrevoke Device
 
-Explicitly re-grants execution authority.
+Explicitly restores execution authority.
 
 client.unrevoke("agent-01")
 
@@ -66,10 +82,16 @@ print(devices)
 MachineID is an authority layer, not a process manager.
 
 - Revoke = execution must stop
-- Unrevoke does not auto-restart
+- Unrevoke does not auto-restart processes
 - Validate is the single source of truth
 
-Always gate execution on validate().
+Always gate execution on `validate()`.
+
+## Links
+
+- Dashboard: https://machineid.io/dashboard
+- Documentation: https://machineid.io/docs
+- Pricing: https://machineid.io/pricing
 
 ## License
 
