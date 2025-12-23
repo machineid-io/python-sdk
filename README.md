@@ -1,45 +1,39 @@
-# MachineID.io Python SDK
+# MachineID Python SDK
 
-Official Python client for the **MachineID.io** API.
+Official Python client for the MachineID device enforcement API.
 
-This SDK provides a thin, explicit wrapper around MachineID’s device and usage endpoints. It is designed for AI agents and distributed systems that need predictable device-level control.
+## Install
 
----
-
-## Installation
-
-```bash
 pip install machineid-io
-```
 
----
+## Initialize
 
-## Prerequisite
+from machineid_io.client import MachineIDClient
 
-Create a free org and generate an org key at:
+client = MachineIDClient(
+    org_key="YOUR_ORG_KEY"
+)
 
-https://machineid.io
+## Register Device
 
-Set it as an environment variable:
+Idempotent. Safe to call every time your agent starts.
 
-```bash
-export MACHINEID_ORG_KEY=org_your_key_here
-```
+client.register("agent-01")
 
----
+## Validate (Runtime Gate)
 
-## Quick Start
+This is the enforcement checkpoint.  
+Your process must stop immediately when allowed is False.
 
-```python
-from machineid_io import MachineID
+res = client.validate("agent-01")
 
-client = MachineID.from_env()
-device_id = "agent-01"
+if not res.allowed:
+    print("Denied:", res.code, res.request_id)
+    raise SystemExit(1)
 
-# Check usage / plan limits
-usage = client.usage()
-print("Plan:", usage["planTier"], "Limit:", usage["limit"])
+### Validate Result Fields
 
+<<<<<<< HEAD
 # Register device (idempotent)
 reg = client.register(device_id)
 
@@ -47,71 +41,40 @@ if reg["status"] not in ("ok", "exists"):
     raise RuntimeError(f"Register failed: {reg}")
 
 print("Register success:", reg["status"])
+=======
+- allowed — True or False  
+- code — Stable decision code (ALLOW, DEVICE_REVOKED, PLAN_FROZEN, etc.)  
+- request_id — Correlation ID for logs and support  
+- status, reason — Legacy fields (still included)  
+- raw — Full raw API response  
+>>>>>>> 78df738 (Python SDK: POST validate + decision codes + request_id)
 
-# Validate before performing work
-val = client.validate(device_id)
-if not val.get("allowed"):
-    raise SystemExit("Device blocked")
+## Revoke Device
 
-print("Device allowed:", val.get("reason"))
-```
+Stops the device on its next validate call.
 
----
+client.revoke("agent-01")
 
-## Supported Operations
+## Unrevoke Device
 
-This SDK supports:
+Explicitly re-grants execution authority.
 
-- `register(device_id)`
-- `validate(device_id)`
-- `list_devices()`
-- `revoke(device_id)`
-- `unrevoke(device_id)`
-- `remove(device_id)`
-- `usage()`
+client.unrevoke("agent-01")
 
-All requests authenticate via the `x-org-key` header and return raw API JSON.
+## List Devices
 
----
+devices = client.list_devices()
+print(devices)
 
-## Scope
+## Enforcement Model
 
-This SDK intentionally does **not**:
+MachineID is an authority layer, not a process manager.
 
-- create orgs
-- manage billing or checkout
-- spawn or orchestrate agents
-- perform analytics or metering
+- Revoke = execution must stop  
+- Unrevoke does not auto-restart  
+- Validate is the single source of truth  
 
-It is a device-level validation and control layer only.
-
----
-
-## Environment-Based Setup
-
-```python
-from machineid_io import MachineID
-
-client = MachineID.from_env()
-```
-
----
-
-## Version
-
-```python
-import machineid_io
-print(machineid_io.__version__)
-```
-
----
-
-## Documentation
-
-- API reference: https://machineid.io/api
-- Docs: https://machineid.io/docs
-
----
+Always gate execution on validate().
 
 ## License
 
