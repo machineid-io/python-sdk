@@ -1,2 +1,7 @@
 __pycache__/
 machineid_io/__pycache__/
+
+# build artifacts
+/dist/
+/build/
+/*.egg-info/
